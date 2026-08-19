@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String
+  name             String
+  role             String
+  age              Int?
+  profession       String?
+  phone            String?
+  address          String?
+  avatar           String?
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  browsingHistory  BrowsingHistory[]
+  cart             Cart?
+  receivedMessages ChatMessage[]     @relation("ReceivedMessages")
+  sentMessages     ChatMessage[]     @relation("SentMessages")
+  sellerOrders     Order[]           @relation("SellerOrders")
+  orders           Order[]
+  receivedPayments Payment[]
+  products         Product[]
+  reviews          Review[]
+}
+
+model Product {
+  id                String            @id @default(cuid())
+  name              String
+  description       String            @default("")
+  price             Float
+  discountPrice     Float?
+  category          String
+  subcategory       String?
+  tags              String            @default("")
+  targetAgeMin      Int?
+  targetAgeMax      Int?
+  targetProfessions String?
+  stockQuantity     Int               @default(0)
+  imageUrl          String?
+  images            String?
+  rating            Float             @default(0)
+  reviewCount       Int               @default(0)
+  isFeatured        Boolean           @default(false)
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  sellerId          String
+  browsingHistory   BrowsingHistory[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+  seller            User              @relation(fields: [sellerId], references: [id])
+  recommendations   Recommendation[]
+  reviews           Review[]
+}
+
+model Cart {
+  id         String     @id @default(cuid())
+  customerId String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  customer   User       @relation(fields: [customerId], references: [id])
+  items      CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  customerId      String
+  totalAmount     Float
+  status          String      @default("PENDING")
+  shippingAddress String
+  paymentMethod   String?
+  notes           String?
+  sellerId        String?
+  seller          User?       @relation("SellerOrders", fields: [sellerId], references: [id])
+  sellerEarnings  Float       @default(0)
+  adminEarnings   Float       @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  customer        User        @relation(fields: [customerId], references: [id])
+  items           OrderItem[]
+  payments        Payment[]
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  productId    String
+  productName  String
+  productPrice Float
+  quantity     Int
+  createdAt    DateTime @default(now())
+  product      Product  @relation(fields: [productId], references: [id])
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  customerId String
+  productId  String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Product  @relation(fields: [productId], references: [id])
+  customer   User     @relation(fields: [customerId], references: [id])
+
+  @@unique([customerId, productId])
+}
+
+model BrowsingHistory {
+  id           String   @id @default(cuid())
+  customerId   String
+  productId    String
+  viewCount    Int      @default(1)
+  lastViewedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  product      Product  @relation(fields: [productId], references: [id])
+  customer     User     @relation(fields: [customerId], references: [id])
+
+  @@unique([customerId, productId])
+}
+
+model Recommendation {
+  id         String   @id @default(cuid())
+  customerId String?
+  productId  String
+  score      Float
+  reason     String
+  createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  recipientId     String
+  recipient       User     @relation(fields: [recipientId], references: [id])
+  amount          Float
+  type            String   // "SELLER_EARNING" or "ADMIN_COMMISSION"
+  status          String   @default("COMPLETED")
+  createdAt       DateTime @default(now())
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String?
+  content    String
+  isFromAI   Boolean  @default(false)
+  sessionId  String
+  createdAt  DateTime @default(now())
+  receiver   User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: nexus-ecommerce
+    runtime: node
+    plan: free
+    buildCommand: npx prisma generate && npx prisma db push && node scripts/seed.js && npm run build
+    startCommand: node .next/standalone/server.js -p $PORT
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # DATABASE_URL will be auto-connected from Render Postgres
+      # Add your Google AI API key here after first deploy:
+      # - key: GOOGLE_AI_API_KEY
+      #   sync: false
+
+databases:
+  - name: nexus-db
+    databaseName: nexus_ecommerce
+    plan: free
