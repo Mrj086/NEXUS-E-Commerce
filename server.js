@@ -16,19 +16,20 @@ fs.mkdirSync(uploadDir, { recursive: true });
 
 // Add your live frontend domain and local server for testing
 const allowedOrigins = [
-  'https://onrender.com',
-  'http://localhost:5173'
+  'https://nexus-e-commerce-frontend.onrender.com/', // Replace with your exact frontend URL from Render
+  'http://localhost:5173',
+  'http://localhost:3000'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like Postman or server-to-server calls)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
     }
-    return callback(null, true);
   },
   credentials: true
 }));
