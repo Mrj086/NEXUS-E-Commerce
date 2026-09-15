@@ -6,7 +6,9 @@ import {BarChart,Bar,XAxis,YAxis,Tooltip,ResponsiveContainer} from "recharts";
 import jsPDF from "jspdf";
 import "./styles.css";
 
-const API="http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : "http://localhost:5000/api";
 const api=async(path,opts={})=>{
   const token=localStorage.getItem("nexus_token");
   const headers=opts.body instanceof FormData?{}:{"Content-Type":"application/json"};
