@@ -1,0 +1,6 @@
+{
+  "name":"nexus-frontend","version":"1.0.0","private":true,"type":"module",
+  "scripts":{"dev":"vite","build":"vite build","preview":"vite preview"},
+  "dependencies":{"@vitejs/plugin-react":"latest","vite":"latest","react":"latest","react-dom":"latest","recharts":"latest","lucide-react":"latest","react-router-dom":"latest","jspdf":"^2.5.1","three":"^0.169.0"},
+  "devDependencies":{}
+}
